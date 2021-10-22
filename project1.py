@@ -41,6 +41,19 @@ def InsertionSort(listToSort):
 BubbleSort
 """
 def BubbleSort(listToSort):
+    if len(listToSort) < 2:
+        return listToSort
+    swapped = True
+    k = 0
+    while swapped:
+        swapped = False
+        for i in range(len(listToSort) - 1 - k):
+            if listToSort[i] > listToSort[i + 1]:
+                temp = listToSort[i]
+                listToSort[i] = listToSort[i + 1]
+                listToSort[i + 1] = temp
+                swapped = True
+        k += 1
     return listToSort
 
 """
@@ -82,10 +95,25 @@ Sort a list with the call QuickSort(listToSort),
 or additionally specify i and j.
 """
 def QuickSort(listToSort, i=0, j=None):
-    # Set default value for j if None.
+    # Set default value for j if None. 
     if j == None:
         j = len(listToSort)
-    return listToSort
+    if len(listToSort) <= 1:
+        return listToSort
+    p = (i + j - 1)//2
+    small = []
+    large = []
+    for ptr in range(i , j):
+        if ptr != p:
+            if listToSort[ptr] <= listToSort[p]:
+                small.append(listToSort[ptr])
+            else:
+                large.append(listToSort[ptr])
+    return QuickSort(small, 0, len(small)) + [listToSort[p]] + QuickSort(large, 0, len(large))
+#    listToSort = small + [listToSort[p]] + large
+#    QuickSort(listToSort, i, p + 1)
+#    QuickSort(listToSort, p + 1, j)
+
 
 """
 Importing the testing code after function defs to ensure same references.
@@ -116,6 +144,7 @@ if __name__ == "__main__":
     print()
     testingSuite(QuickSort)
     print()
-    print('DEFAULT measureTime')
-    print()
-    measureTime()
+    
+#    print('DEFAULT measureTime')
+ #   print()
+  #  measureTime()
