@@ -96,7 +96,6 @@ or additionally specify i and j.
 """
 def partition(listToSort, i, j):
     if j - i <1:
-        print
         return
     a = i
     b = j - 1
@@ -164,6 +163,6 @@ if __name__ == "__main__":
     testingSuite(QuickSort)
     print()
     
-#    print('DEFAULT measureTime')
- #   print()
-  #  measureTime()
+    print('DEFAULT measureTime')
+    print()
+    measureTime()

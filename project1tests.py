@@ -368,10 +368,4 @@ def measureTime(preSorted = False, numTrials = 30):
           % (400 if preSorted else 200, mQS))
 
     # Close all figures.
-    plt.close('all')
-
-def main():
-    testingSuite(MergeSort)
-
-if __name__ == "__main__":
-    main()
+    #plt.close('all')
