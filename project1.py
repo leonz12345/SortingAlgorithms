@@ -4,7 +4,7 @@ Project 1
 Fall 2021
 
 Partner 1: Leon Zhang
-Partner 2: Powen Hsiao
+Partner 2: Casper Hsiao
 Date: 21th Oct 2021
 """
 
@@ -94,26 +94,45 @@ QuickSort
 Sort a list with the call QuickSort(listToSort),
 or additionally specify i and j.
 """
+def partition(listToSort, i, j):
+    if j - i <1:
+        print
+        return
+    a = i
+    b = j - 1
+    p = (a + b)//2
+    while a < p or b > p:
+        foundA = False
+        foundB = False
+        while a < p and foundA == False:
+            if listToSort[a] <= listToSort[p]:
+                a += 1
+            else:
+                foundA = True
+        while b > p and foundB == False:
+            if listToSort[b] >= listToSort[p]:
+                b -= 1
+            else:
+                foundB = True
+        if foundA or foundB:
+            temp = listToSort[a]
+            listToSort[a] = listToSort[b]
+            listToSort[b] = temp
+            if not foundA:
+                p = b
+            if not foundB:
+                p = a
+    partition(listToSort, i, p)
+    partition(listToSort, p + 1, j)
+
 def QuickSort(listToSort, i=0, j=None):
     # Set default value for j if None. 
     if j == None:
         j = len(listToSort)
-    if len(listToSort) <= 1:
-        return listToSort
-    p = (i + j - 1)//2
-    small = []
-    large = []
-    for ptr in range(i , j):
-        if ptr != p:
-            if listToSort[ptr] <= listToSort[p]:
-                small.append(listToSort[ptr])
-            else:
-                large.append(listToSort[ptr])
-    return QuickSort(small, 0, len(small)) + [listToSort[p]] + QuickSort(large, 0, len(large))
-#    listToSort = small + [listToSort[p]] + large
-#    QuickSort(listToSort, i, p + 1)
-#    QuickSort(listToSort, p + 1, j)
-
+    partition(listToSort, i, j)
+    return listToSort
+            
+        
 
 """
 Importing the testing code after function defs to ensure same references.
