@@ -41,13 +41,16 @@ def InsertionSort(listToSort):
 BubbleSort
 """
 def BubbleSort(listToSort):
-    if len(listToSort) < 2:
+    # List with less than two items is already sorted
+    if len(listToSort) < 2: 
         return listToSort
     swapped = True
     k = 0
-    while swapped:
+    # Enters bubble sort repeatedly until there is no element swapped 
+    while swapped: 
         swapped = False
-        for i in range(len(listToSort) - 1 - k):
+        # Each time the kth largest is sorted, and range decreases correspondingly
+        for i in range(len(listToSort) - 1 - k): 
             if listToSort[i] > listToSort[i + 1]:
                 temp = listToSort[i]
                 listToSort[i] = listToSort[i + 1]
@@ -88,42 +91,52 @@ def MergeSort(listToSort):
             k += 1
     return listToSort
 
-"""
-QuickSort
-
-Sort a list with the call QuickSort(listToSort),
-or additionally specify i and j.
-"""
+'''
+The recursive helper funtion for quick sort.
+@param listToSort - The list to sort
+@param i - The start index (inclusive) of the range to sort
+@param j - The end index (inclusive) of the range to sort
+'''
 def partition(listToSort, i, j):
-    if j - i <1:
+    # Stops sorting when the partion is less than two elements
+    if j - i < 1: 
         return
     a = i
     b = j - 1
     p = (a + b)//2
-    while a < p or b > p:
+    # Enters the sorting until both sides of the partition is sorted
+    while a < p or b > p: 
         foundA = False
         foundB = False
-        while a < p and foundA == False:
+        # Finds the element on the left partition to swap
+        while a < p and foundA == False: 
             if listToSort[a] <= listToSort[p]:
                 a += 1
             else:
                 foundA = True
-        while b > p and foundB == False:
+        # Finds the element on the right parition to swap
+        while b > p and foundB == False: 
             if listToSort[b] >= listToSort[p]:
                 b -= 1
             else:
                 foundB = True
-        if foundA or foundB:
+        if foundA or foundB: # Swap the elements
             temp = listToSort[a]
             listToSort[a] = listToSort[b]
             listToSort[b] = temp
-            if not foundA:
+            if not foundA: # Adjusts the index of pivot after the swap
                 p = b
             if not foundB:
                 p = a
-    partition(listToSort, i, p)
+    # Recursively swap the left and right side of the partition
+    partition(listToSort, i, p) 
     partition(listToSort, p + 1, j)
 
+"""
+QuickSort
+Sort a list with the call QuickSort(listToSort),
+or additionally specify i and j.
+"""
 def QuickSort(listToSort, i=0, j=None):
     # Set default value for j if None. 
     if j == None:
