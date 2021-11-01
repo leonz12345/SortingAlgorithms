@@ -1,7 +1,7 @@
 """
 Math 560
 Project 1
-Fall 2020
+Fall 2021
 Provided Testing Code
 """
 
@@ -186,13 +186,20 @@ def measureTime(preSorted = False, numTrials = 30):
     # First, we seed the random number generator to ensure consistency.
     random.seed(1)
 
+    # Define a scaling constant for n for insertion and bubble sort.
+    scaleN = 1
+    ISind = 1
+    BBind = 2
+    TIMind = 5
+
     # We now define the range of n values to consider.
     if preSorted:
         # Need to look at larger n to get a good sense of runtime.
         # Look at n from 20 to 980.
-        # Note that 1000 causes issues with recursion depth...
+        # Note that 1000 causes issues with recursion depth for merge and quick.
         N = list(range(1,50))
         N = [20*x for x in N]
+        scaleN = 10 # Make insertion and bubble do larger tests.
     else:
         # Look at n from 10 to 500.
         N = list(range(1,51))
@@ -222,18 +229,21 @@ def measureTime(preSorted = False, numTrials = 30):
         # Reset the running sum of the runtimes.
         timing = [0,0,0,0,0,0]
         
-        # Loop over the 30 tests.
+        # Loop over the tests.
         for test in range(1,numTrials+1):
-            # Create the random list of size n to sort.
-            listToSort = list(range(0,n))
-            listToSort = [random.random() for x in listToSort]
-
-            if preSorted:
-                # Pre-sort the list.
-                listToSort.sort()
 
             # Loop over the algs.
             for aI in range(0,len(algs)):
+                # If preSorted and insertion or bubble or tim, make the 
+                # testing list longer to get better tests...
+                if preSorted and (aI == ISind or aI == BBind or aI == TIMind):
+                    listToSort = list(range(0,n*scaleN))
+                else:
+                    listToSort = list(range(0,n))
+
+                    if not preSorted:
+                        listToSort = [random.random() for x in listToSort]
+
                 # Grab the name of the alg.
                 alg = algs[aI]
 
@@ -277,8 +287,9 @@ def measureTime(preSorted = False, numTrials = 30):
         alg = algs[aI].__name__ if aI != 5 else 'Python'
 
         # Plot.
+        scaleNP = scaleN if (aI == ISind or aI == BBind or aI == TIMind) else 1
         plt.figure()
-        plt.plot(N,locals()['t%s' % alg])
+        plt.plot([scaleNP*nn for nn in N],locals()['t%s' % alg])
         plt.title('%s runtime versus n' % alg)
         plt.xlabel('Input Size n')
         plt.ylabel('Runtime (s)')
@@ -291,12 +302,15 @@ def measureTime(preSorted = False, numTrials = 30):
     plt.figure()
     fig, ax = plt.subplots()
     ax.plot(N,tSelectionSort, label='Selection')
-    ax.plot(N,tInsertionSort, label='Insertion')
-    ax.plot(N,tBubbleSort, label='Bubble')
+    ax.plot([scaleN*nn for nn in N],tInsertionSort, label='Insertion')
+    ax.plot([scaleN*nn for nn in N],tBubbleSort, label='Bubble')
     ax.plot(N,tMergeSort, label='Merge')
     ax.plot(N,tQuickSort, label='Quick')
-    ax.plot(N,tPython, label='Python')
-    legend = ax.legend(loc='upper left')
+    ax.plot([scaleN*nn for nn in N],tPython, label='Python')
+    if preSorted:
+        legend = ax.legend(loc='upper right')
+    else:
+        legend = ax.legend(loc='upper left')
     plt.title('All sorting runtimes versus n')
     plt.xlabel('Input Size n')
     plt.ylabel('Runtime (s)')
@@ -307,6 +321,8 @@ def measureTime(preSorted = False, numTrials = 30):
 
     # Now look at the log of the sort times.
     logN = [(numpy.log(x) if x>0 else -16) for x in N]
+    scaleLogN = [(numpy.log(x) if x>0 else -16) \
+                 for x in [scaleN*nn for nn in N]]
     logSS = [(numpy.log(x) if x>0 else -16) for x in tSelectionSort]
     logIS = [(numpy.log(x) if x>0 else -16) for x in tInsertionSort]
     logBS = [(numpy.log(x) if x>0 else -16) for x in tBubbleSort]
@@ -315,15 +331,19 @@ def measureTime(preSorted = False, numTrials = 30):
 
     # Linear regression.
     mSS, _, _, _, _ = stats.linregress(logN,logSS)
-    mIS, _, _, _, _ = stats.linregress(logN,logIS)
-    mBS, _, _, _, _ = stats.linregress(logN,logBS)
+    mIS, _, _, _, _ = stats.linregress(scaleLogN,logIS)
+    mBS, _, _, _, _ = stats.linregress(scaleLogN,logBS)
+    mMS, _, _, _, _ = stats.linregress(scaleLogN,logMS)
+    mQS, _, _, _, _ = stats.linregress(scaleLogN,logQS)
 
     # Plot log-log figure.
     plt.figure()
     fig, ax = plt.subplots()
     ax.plot(logN,logSS, label='Selection')
-    ax.plot(logN,logIS, label='Insertion')
-    ax.plot(logN,logBS, label='Bubble')
+    ax.plot(scaleLogN,logIS, label='Insertion')
+    ax.plot(scaleLogN,logBS, label='Bubble')
+    ax.plot(scaleLogN,logMS, label='Merge')
+    ax.plot(scaleLogN,logQS, label='Quick')
     legend = ax.legend(loc='upper left')
     plt.title('Log-Log plot of runtimes versus n')
     plt.xlabel('log(n)')
@@ -338,34 +358,39 @@ def measureTime(preSorted = False, numTrials = 30):
     print('Selection Sort log-log Slope (all n): %f' % mSS)
     print('Insertion Sort log-log Slope (all n): %f' % mIS)
     print('Bubble Sort log-log Slope (all n): %f' % mBS)
+    print('Merge Sort log-log Slope (all n): %f' % mMS)
+    print('Quick Sort log-log Slope (all n): %f' % mQS)
     print()
 
-    # Now strip off all n<200...
-    logN = logN[19:]
-    logSS = logSS[19:]
-    logIS = logIS[19:]
-    logBS = logBS[19:]
-    logMS = logMS[19:]
-    logQS = logQS[19:]
+    # Now strip off all n<200 (or 400 for preSorted)...
+    cutoff = 400 if preSorted else 200
+    indCut = (cutoff//20)-1 if preSorted else (cutoff//10)-1
+    logN = logN[indCut:]
+    scaleLogN = scaleLogN[indCut:]
+    logSS = logSS[indCut:]
+    logIS = logIS[indCut:]
+    logBS = logBS[indCut:]
+    logMS = logMS[indCut:]
+    logQS = logQS[indCut:]
 
     # Linear regression.
     mSS, _, _, _, _ = stats.linregress(logN,logSS)
-    mIS, _, _, _, _ = stats.linregress(logN,logIS)
-    mBS, _, _, _, _ = stats.linregress(logN,logBS)
+    mIS, _, _, _, _ = stats.linregress(scaleLogN,logIS)
+    mBS, _, _, _, _ = stats.linregress(scaleLogN,logBS)
     mMS, _, _, _, _ = stats.linregress(logN,logMS)
     mQS, _, _, _, _ = stats.linregress(logN,logQS)
 
     # Print the regression info.
     print('Selection Sort log-log Slope (n>%d): %f' \
-          % (400 if preSorted else 200, mSS))
+          % (cutoff, mSS))
     print('Insertion Sort log-log Slope (n>%d): %f' \
-          % (400 if preSorted else 200, mIS))
+          % (cutoff, mIS))
     print('Bubble Sort log-log Slope (n>%d): %f' \
-          % (400 if preSorted else 200, mBS))
+          % (cutoff, mBS))
     print('Merge Sort log-log Slope (n>%d): %f' \
-          % (400 if preSorted else 200, mMS))
+          % (cutoff, mMS))
     print('Quick Sort log-log Slope (n>%d): %f' \
-          % (400 if preSorted else 200, mQS))
+          % (cutoff, mQS))
 
     # Close all figures.
-    #plt.close('all')
+    plt.close('all')
